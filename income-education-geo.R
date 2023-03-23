@@ -56,7 +56,7 @@ data <-
         x > 0 & y > 0 ~ "VM Women+",
         x < 0 & y > 0 ~ "VM Men+",
         x < 0 & y < 0 ~ "non-VM Men+",
-        x > 0 & y < 0 ~ "non-VM Women +"
+        x > 0 & y < 0 ~ "non-VM Women+"
       )
     )
   ) %>% 
@@ -64,7 +64,7 @@ data <-
 
 national_data <- data  %>% 
   filter(geo == "Canada") %>% 
-  select(quad, x, y)
+  select(quad, income, education)
 
 # plot set up -------------------------------------------------------------
 
@@ -82,15 +82,57 @@ mygrid <- data.frame(
 )
 
 annotation_text <- data.frame(
-  x = c(0, 0, 90000, -90000),
-  y = c(90, -90, 0, 0),
+  x = c(0, 0, 100000, -100000),
+  y = c(100, -100, 0, 0),
   angles = c(0, 0, -90, 90),
   labels = c("Visible minorities", "Not visible minorities", "Women", "Men")
 )
 
 # plotting ----------------------------------------------------------------
 
-
+data  %>%
+  filter(geo != "Canada") %>%
+  mutate(
+    quad = factor(
+      quad, 
+      levels = c("VM Women+", "non-VM Women+", "VM Men+", "non-VM Men+")
+    )
+  ) %>% 
+  ggplot() +
+  geom_rect(
+    aes(xmin = 0, ymin = 0, xmax = income, ymax = education, color = quad),
+    fill = NA, size = 1.5
+  ) +
+  labs(
+    x = "Average salary",
+    y = "% with postsecondary certificate, diploma or degree"
+  ) +
+  # facet_geo(~geo, grid = mygrid) +
+  facet_wrap(~code) +
+  scale_y_continuous(
+    limits = c(0, 110),
+    breaks = c(0, 50, 100),
+    labels = scales::percent_format(scale = 1),
+    position = "right"
+  ) +
+  scale_x_continuous(
+    limits = c(0, 110000),
+    breaks = c(0, 50000, 100000),
+    labels = scales::dollar_format()
+  ) +
+  theme_void() +
+  theme(
+    aspect.ratio = 1,
+    plot.margin = margin(t = 20, b = 20),
+    panel.spacing = unit(10, "mm"),
+    panel.grid.major = element_line(color = "grey90"),
+    panel.border = element_rect(fill = NA),
+    axis.text = element_text(size = 8, margin = margin(l = 2, t = 2)),
+    strip.text = element_text(margin = margin(b = 5)),
+    # axis.title = element_text(),
+    # axis.title.y = element_text(angle = 90),
+    legend.position = "top"
+  )
 
 # canada-wide & legend
 data  %>%
@@ -100,12 +142,12 @@ data  %>%
     aes(xmin = 0, ymin = 0, xmax = x, ymax = y, fill = quad),
     color = "white"
   ) +
-  geom_rect(
-    aes(
-      xmin = -100000, xmax = 100000, ymin = -100, ymax = 100
-    ),
-    fill = NA, color = "black", size = 3
-  ) +
+  # geom_rect(
+  #   aes(
+  #     xmin = -100000, xmax = 100000, ymin = -100, ymax = 100
+  #   ),
+  #   fill = NA, color = "black"
+  # ) +
   geom_vline(xintercept = 0) +
   geom_hline(yintercept = 0) +
   geom_point(
@@ -117,7 +159,8 @@ data  %>%
   ) +
   geom_text(
     data = annotation_text,
-    aes(x = x, y = y, label = labels, angle = angles)
+    aes(x = x, y = y, label = labels, angle = angles),
+    size = 5
   ) +
   labs(
     x = "Average salary",
@@ -127,19 +170,23 @@ data  %>%
     fill = guide_none()
   ) +
   scale_y_continuous(
-    breaks = 100,
+    limits = c(-110, 110),
+    breaks = c(-100, -50, 0, 50, 100),
     labels = scales::percent_format(scale = 1)
   ) +
   scale_x_continuous(
-    breaks = 100000,
+    limits = c(-110000, 110000),
+    breaks = c(-100000, -50000, 0, 50000, 100000),
     labels = scales::dollar_format()
   ) +
   # facet_geo(~ code, grid = "ca_prov_grid1") +
   theme_minimal() +
   theme(
     aspect.ratio = 1,
-    axis.title.x = element_text(hjust = 0.05, size = 8),
-    axis.title.y = element_text(hjust = 0.1, size = 8)
+    axis.title.x = element_text(size = 15, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 15, margin = margin(r = 10)),
+    panel.grid.minor = element_blank(),
+    plot.margin = margin(25, 25, 25, 25)
   )
 
 data  %>% 
@@ -158,11 +205,23 @@ data  %>%
   guides(
     fill = guide_none()
   ) +
+  scale_y_continuous(
+    limits = c(-110, 110),
+    breaks = c(-100, -50, 0, 50, 100)
+    # labels = scales::percent_format(scale = 1)
+  ) +
+  scale_x_continuous(
+    limits = c(-110000, 110000),
+    breaks = c(-110000, -50000, 0, 50000, 100000)
+    # labels = scales::dollar_format()
+  ) +
   # facet_wrap(~ geo, nrow = 2) +
   facet_geo(~ code, grid = mygrid) +
-  theme_void() +
+  theme_minimal() +
   theme(
     aspect.ratio = 1,
     plot.margin = margin(20, 20, 20, 20),
+    panel.grid.minor = element_blank(),
+    axis.text = element_blank(),
     strip.text = element_text(margin = margin(b = 7), face = "bold")
   )
