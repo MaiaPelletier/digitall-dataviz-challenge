@@ -92,6 +92,7 @@ annotation_text <- data.frame(
 
 data  %>%
   filter(geo != "Canada") %>%
+  filter(!code %in% c("YT", "NT", "NU")) %>% 
   mutate(
     quad = factor(
       quad, 
@@ -105,15 +106,17 @@ data  %>%
   ) +
   labs(
     x = "Average salary",
-    y = "% with postsecondary certificate, diploma or degree"
+    y = "% with postsecondary certificate, diploma or degree",
+    title = "Over-educated & under-paid",
+    subtitle = "VM Women+ are the most educated in most provinces and the lowest paid on average in all provinces (Nunavut exception)"
   ) +
   # facet_geo(~geo, grid = mygrid) +
-  facet_wrap(~code) +
+  facet_wrap(~code, nrow = 2) +
   scale_y_continuous(
     limits = c(0, 110),
     breaks = c(0, 50, 100),
     labels = scales::percent_format(scale = 1),
-    position = "right"
+    position = "left"
   ) +
   scale_x_continuous(
     limits = c(0, 110000),
@@ -123,14 +126,14 @@ data  %>%
   theme_void() +
   theme(
     aspect.ratio = 1,
-    plot.margin = margin(t = 20, b = 20),
+    plot.margin = margin(t = 20, b = 20, l = 20, r = 20),
     panel.spacing = unit(10, "mm"),
     panel.grid.major = element_line(color = "grey90"),
-    panel.border = element_rect(fill = NA),
+    # panel.border = element_rect(fill = NA),
     axis.text = element_text(size = 8, margin = margin(l = 2, t = 2)),
     strip.text = element_text(margin = margin(b = 5)),
-    # axis.title = element_text(),
-    # axis.title.y = element_text(angle = 90),
+    axis.title = element_text(),
+    axis.title.y = element_text(angle = 90),
     legend.position = "top"
   )
 
